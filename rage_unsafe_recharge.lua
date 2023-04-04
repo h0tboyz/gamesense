@@ -49,6 +49,11 @@ local func = {
             vars.globals.local_vulnerable = dmg > 1
         end
     end,
+    weapon_can_fire = function(ent)
+	    local active_weapon = entity.get_prop(ent, "m_hActiveWeapon")
+	    local nextAttack = entity.get_prop(active_weapon, "m_flNextPrimaryAttack")
+	    return globals.curtime() >= nextAttack
+    end,
 }
 
 client.set_event_callback('net_update_end', function()
@@ -97,7 +102,18 @@ client.set_event_callback("setup_command", function(e)
         ui.set(vars.ref.aimbot, true) 
         return 
     end
+    
+    local weapon = entity.get_player_weapon(local_player)
 
+    if weapon == nil then 
+        ui.set(vars.ref.aimbot, true) 
+        return 
+    end
+
+    if func.weapon_can_fire(local_player) and entity.get_classname(weapon) == 'CKnife' then 
+        ui.set(vars.ref.aimbot, true)
+    end
+    
     ui.set(vars.ref.aimbot, vars.globals.charged) 
 end)
  
