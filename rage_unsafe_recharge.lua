@@ -86,8 +86,6 @@ client.set_event_callback("setup_command", function(e)
     local local_player = entity.get_local_player()
     if local_player == nil then return end 
 
-    print(vars.globals.charged)
-
     if bit.band(entity.get_prop(local_player, "m_fFlags"), 1) == 1 then 
         ui.set(vars.ref.aimbot, true) 
         return 
