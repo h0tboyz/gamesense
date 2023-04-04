@@ -24,9 +24,28 @@ local func = {
             return 
         end
 
-        if (bit.band(entity.get_esp_data(th).flags, bit.lshift(1, 11)) == 2048) then 
-            vars.globals.local_vulnerable = true 
-            return
+        if ui.get(vars.ref.flags) then 
+            if (bit.band(entity.get_esp_data(th).flags, bit.lshift(1, 11)) == 2048) then 
+                vars.globals.local_vulnerable = true 
+                return
+            end
+        else
+            if entity.is_dormant(th) then 
+                vars.globals.local_vulnerable = false 
+                return 
+            end
+
+            local start_pos = {entity.hitbox_position(th, 0)}
+            local end_pos = {entity.get_prop(local_player, "m_vecOrigin")}
+            end_pos[3] = end_pos[3] + 32
+
+            local _, dmg = client.trace_bullet(th, start_pos[1], start_pos[2], start_pos[3], end_pos[1], end_pos[2], end_pos[3], false)
+
+            if dmg > 1 then
+                vars.globals.local_vulnerable = true 
+            else
+                vars.globals.local_vulnerable = false 
+            end
         end
     end,
 }
