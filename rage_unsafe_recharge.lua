@@ -46,11 +46,7 @@ local func = {
 
             local _, dmg = client.trace_bullet(th, start_pos[1], start_pos[2], start_pos[3], end_pos[1], end_pos[2], end_pos[3], false)
 
-            if dmg > 1 then
-                vars.globals.local_vulnerable = true 
-            else
-                vars.globals.local_vulnerable = false 
-            end
+            vars.globals.local_vulnerable = dmg > 1
         end
     end,
 }
