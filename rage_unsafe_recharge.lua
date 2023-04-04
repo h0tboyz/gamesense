@@ -11,7 +11,12 @@ local vars = {
     },
     globals = {
         local_vulnerable = nil,
-        local_player = nil,
+        tickbase = nil,
+        
+        charged = false,
+
+        data = {},
+        index = 1,
     },
 }
 
@@ -50,30 +55,56 @@ local func = {
     end,
 }
 
-client.set_event_callback("setup_command", function(e)
-    local local_player = vars.globals.local_player
-    if local_player == nil then 
-        vars.globals.local_player = entity.get_local_player()
-        return
-    end 
+client.set_event_callback('net_update_end', function()
+    local local_player = entity.get_local_player()
+    if local_player == nil then return end 
 
-    if bit.band(entity.get_prop(local_player, "m_fFlags"), 1) == 0 then 
-        func.update_vulnerable_state(local_player)
-            
-        if ui.get(vars.ref.dt) and ui.get(vars.ref.dt_key) and vars.globals.local_vulnerable == true then
-            if antiaim_funcs.get_double_tap() == false then 
-                ui.set(vars.ref.aimbot, false)
-            else
-                ui.set(vars.ref.aimbot, true)
-            end
-        end
-    else
-        ui.set(vars.ref.aimbot, true) 
+    if vars.globals.tickbase == nil then
+        vars.globals.tickbase = entity.get_prop(local_player, 'm_nTickBase')
+        return
     end
+
+    local current_tickbase = entity.get_prop(local_player, 'm_nTickBase')
+
+    vars.globals.data[vars.globals.index] = current_tickbase - vars.globals.tickbase
+    vars.globals.index = vars.globals.index + 1
+    vars.globals.index = vars.globals.index % 16
+
+    vars.globals.charged = false 
+
+    for i=1, 15 do 
+       if vars.globals.data[i] ~= nil and vars.globals.data[i] < 0 then
+            vars.globals.charged = true
+            return
+       end
+    end
+
+    if vars.globals.charged == false and antiaim_funcs.get_tickbase_shifting() > 0 then
+        vars.globals.charged = true
+    end
+
+    vars.globals.tickbase = current_tickbase
 end)
 
-client.set_event_callback("round_prestart", function()
-    vars.globals.local_player = entity.get_local_player()
+client.set_event_callback("setup_command", function(e)
+    local local_player = entity.get_local_player()
+    if local_player == nil then return end 
+
+    print(vars.globals.charged)
+
+    if bit.band(entity.get_prop(local_player, "m_fFlags"), 1) == 1 then 
+        ui.set(vars.ref.aimbot, true) 
+        return 
+    end
+
+    func.update_vulnerable_state(local_player)
+        
+    if not ui.get(vars.ref.dt) or not ui.get(vars.ref.dt_key) or vars.globals.local_vulnerable == false then
+        ui.set(vars.ref.aimbot, true) 
+        return 
+    end
+
+    ui.set(vars.ref.aimbot, vars.globals.charged) 
 end)
  
 client.set_event_callback("shutdown", function()
