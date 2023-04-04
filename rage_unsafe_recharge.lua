@@ -62,10 +62,8 @@ client.set_event_callback("setup_command", function(e)
             
         if ui.get(vars.ref.dt) and ui.get(vars.ref.dt_key) and vars.globals.local_vulnerable == true then
             if antiaim_funcs.get_double_tap() == false then 
-                print("No aimbot")
                 ui.set(vars.ref.aimbot, false)
             else
-                print("Yes aimbot")
                 ui.set(vars.ref.aimbot, true)
             end
         end
