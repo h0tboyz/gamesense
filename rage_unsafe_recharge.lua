@@ -33,6 +33,9 @@ local func = {
             if (bit.band(entity.get_esp_data(th).flags, bit.lshift(1, 11)) == 2048) then 
                 vars.globals.local_vulnerable = true 
                 return
+	    else
+		vars.globals.local_vulnerable = false 
+                return		
             end
         else
             if entity.is_dormant(th) then 
